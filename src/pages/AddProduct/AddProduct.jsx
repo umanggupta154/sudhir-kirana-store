@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import PageHeader from "../../components/Common/PageHeader";
 import categories from "../../utils/categories";
+import { addProduct } from "../../services/productService";
 
 function AddProduct() {
   const {
@@ -9,13 +10,16 @@ function AddProduct() {
     reset,
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+  const result = await addProduct(data);
 
-    alert("Product Saved Successfully");
-
+  if (result.success) {
+    alert(result.message);
     reset();
-  };
+  } else {
+    alert(result.message);
+  }
+};
 
   return (
     <div>
