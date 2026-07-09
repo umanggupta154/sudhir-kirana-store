@@ -1,6 +1,7 @@
 import {
   collection,
   addDoc,
+  getDocs,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -25,5 +26,22 @@ export async function addProduct(product) {
       success: false,
       message: error.message,
     };
+  }
+}
+
+// 👇 Ye naya function add karo
+export async function getProducts() {
+  try {
+    const snapshot = await getDocs(collection(db, "products"));
+
+    const products = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return products;
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 }
