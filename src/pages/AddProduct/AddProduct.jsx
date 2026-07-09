@@ -1,169 +1,711 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+
 import PageHeader from "../../components/Common/PageHeader";
 import categories from "../../utils/categories";
 import { addProduct } from "../../services/productService";
 
+
 function AddProduct() {
+
+  const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+
+
   const {
     register,
     handleSubmit,
     reset,
-  } = useForm();
+    control,
+    formState: { errors },
+  } = useForm({
 
-  const onSubmit = async (data) => {
-  const result = await addProduct(data);
+    defaultValues: {
+      available: true,
+      unit: "Kg",
+    }
 
-  if (result.success) {
-    alert(result.message);
-    reset();
-  } else {
-    alert(result.message);
-  }
-};
+  });
+
+
+
+  const purchasePrice = useWatch({
+    control,
+    name: "purchasePrice"
+  });
+
+
+  const sellingPrice = useWatch({
+    control,
+    name: "sellingPrice"
+  });
+
+
+
+  const profitPercent =
+    purchasePrice && sellingPrice
+      ? (
+          ((sellingPrice - purchasePrice) / purchasePrice) * 100
+        ).toFixed(2)
+      : 0;
+
+
+
+
+
+  const handleImageChange = (e)=>{
+
+    const file = e.target.files[0];
+
+    if(file){
+
+      setImagePreview(
+        URL.createObjectURL(file)
+      );
+
+    }
+
+  };
+
+
+
+
+
+
+  const onSubmit = async(data)=>{
+
+
+    try{
+
+      setLoading(true);
+
+
+      const productData = {
+
+        ...data,
+
+        profitPercent: Number(profitPercent),
+
+        purchasePrice:
+          Number(data.purchasePrice),
+
+        sellingPrice:
+          Number(data.sellingPrice),
+
+        stock:
+          Number(data.stock),
+
+        minimumStock:
+          Number(data.minimumStock),
+
+        image:imagePreview
+
+      };
+
+
+
+      const result = await addProduct(productData);
+
+
+
+      if(result.success){
+
+        alert(result.message);
+
+        reset();
+
+        setImagePreview(null);
+
+      }
+      else{
+
+        alert(result.message);
+
+      }
+
+
+    }
+    catch(error){
+
+      alert("Something went wrong");
+
+    }
+    finally{
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+
+
 
   return (
+
     <div>
 
+
       <PageHeader
+
         title="Add Product"
-        subtitle="Add a new product to your inventory"
+
+        subtitle="Create a new inventory product"
+
       />
 
+
+
+
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-8 rounded-xl shadow-md space-y-5"
+
+        onSubmit={
+          handleSubmit(onSubmit)
+        }
+
+        className="space-y-6"
+
       >
 
-        {/* Product Name */}
 
-        <div>
 
-          <label className="font-medium">
-            Product Name
-          </label>
 
-          <input
-            {...register("name")}
-            type="text"
-            className="w-full border rounded-lg p-3 mt-2"
-            placeholder="Enter product name"
-          />
+        {/* IMAGE CARD */}
+
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+
+
+          <h2 className="text-lg font-semibold mb-4">
+            Product Image
+          </h2>
+
+
+
+          <div className="flex items-center gap-6">
+
+
+            {
+
+              imagePreview ? (
+
+                <img
+
+                  src={imagePreview}
+
+                  className="w-32 h-32 object-cover rounded-xl border"
+
+                />
+
+              ):(
+
+                <div className="w-32 h-32 rounded-xl border flex items-center justify-center text-gray-400">
+
+                  No Image
+
+                </div>
+
+              )
+
+            }
+
+
+
+            <label className="cursor-pointer bg-gray-100 px-5 py-3 rounded-lg hover:bg-gray-200">
+
+              Upload Image
+
+
+              <input
+
+                type="file"
+
+                accept="image/*"
+
+                hidden
+
+                onChange={handleImageChange}
+
+              />
+
+            </label>
+
+
+
+          </div>
+
 
         </div>
 
-        {/* Category */}
 
-        <div>
 
-          <label className="font-medium">
-            Category
-          </label>
 
-          <select
-            {...register("category")}
-            className="w-full border rounded-lg p-3 mt-2"
-          >
 
-            <option value="">
-              Select Category
-            </option>
 
-            {categories.map((category) => (
 
-              <option
-                key={category}
-                value={category}
+        {/* BASIC INFORMATION */}
+
+
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+
+
+          <h2 className="text-lg font-semibold mb-5">
+
+            Basic Information
+
+          </h2>
+
+
+
+          <div className="grid md:grid-cols-2 gap-5">
+
+
+            <div>
+
+              <label>
+                Product Name
+              </label>
+
+              <input
+
+                {...register("name",{
+                  required:true
+                })}
+
+                className="input-style"
+
+                placeholder="Enter product name"
+
+              />
+
+            </div>
+
+
+
+
+
+            <div>
+
+              <label>
+                Brand
+              </label>
+
+
+              <input
+
+                {...register("brand")}
+
+                className="input-style"
+
+                placeholder="Enter brand name"
+
+              />
+
+            </div>
+
+
+
+
+
+
+            <div>
+
+              <label>
+                Category
+              </label>
+
+
+              <select
+
+                {...register("category",{
+                  required:true
+                })}
+
+                className="input-style"
+
               >
-                {category}
-              </option>
 
-            ))}
+                <option value="">
+                  Select Category
+                </option>
 
-          </select>
+
+                {
+                  categories.map((cat)=>(
+
+                    <option
+                      key={cat}
+                      value={cat}
+                    >
+
+                      {cat}
+
+                    </option>
+
+                  ))
+                }
+
+
+              </select>
+
+
+            </div>
+
+
+
+
+
+
+
+            <div>
+
+              <label>
+                Unit
+              </label>
+
+
+              <select
+
+                {...register("unit")}
+
+                className="input-style"
+
+              >
+
+                <option>Kg</option>
+
+                <option>Gram</option>
+
+                <option>Litre</option>
+
+                <option>Packet</option>
+
+                <option>Piece</option>
+
+
+              </select>
+
+
+            </div>
+
+
+          </div>
+
 
         </div>
 
-        {/* Price */}
 
-        <div>
 
-          <label className="font-medium">
-            Price
-          </label>
 
-          <input
-            {...register("price")}
-            type="number"
-            className="w-full border rounded-lg p-3 mt-2"
-            placeholder="₹"
+
+
+
+
+        {/* PRICING */}
+
+
+
+
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+
+
+          <h2 className="text-lg font-semibold mb-5">
+
+            Pricing
+
+          </h2>
+
+
+
+
+          <div className="grid md:grid-cols-3 gap-5">
+
+
+
+            <div>
+
+              <label>
+                Purchase Price
+              </label>
+
+
+              <input
+
+                type="number"
+
+                {...register("purchasePrice",{
+                  required:true
+                })}
+
+                className="input-style"
+
+                placeholder="₹"
+
+              />
+
+
+            </div>
+
+
+
+
+
+
+
+            <div>
+
+              <label>
+                Selling Price
+              </label>
+
+
+              <input
+
+                type="number"
+
+                {...register("sellingPrice",{
+                  required:true
+                })}
+
+                className="input-style"
+
+                placeholder="₹"
+
+              />
+
+
+            </div>
+
+
+
+
+
+
+
+            <div>
+
+              <label>
+                Profit %
+              </label>
+
+
+              <input
+
+                value={profitPercent}
+
+                readOnly
+
+                className="input-style bg-gray-100"
+
+              />
+
+
+            </div>
+
+
+          </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+        {/* INVENTORY */}
+
+
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+
+
+          <h2 className="text-lg font-semibold mb-5">
+
+            Inventory
+
+          </h2>
+
+
+
+
+          <div className="grid md:grid-cols-2 gap-5">
+
+
+
+            <div>
+
+              <label>
+                Current Stock
+              </label>
+
+
+              <input
+
+                type="number"
+
+                {...register("stock",{
+                  required:true
+                })}
+
+
+                className="input-style"
+
+              />
+
+
+            </div>
+
+
+
+
+
+
+            <div>
+
+              <label>
+                Minimum Stock Alert
+              </label>
+
+
+              <input
+
+                type="number"
+
+                {...register("minimumStock")}
+
+                className="input-style"
+
+                placeholder="Alert when stock is low"
+
+              />
+
+
+            </div>
+
+
+
+          </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+        {/* DESCRIPTION */}
+
+
+
+
+
+        <div className="bg-white rounded-xl shadow-md p-6">
+
+
+          <h2 className="text-lg font-semibold mb-4">
+
+            Description
+
+          </h2>
+
+
+          <textarea
+
+            {...register("description")}
+
+            rows="4"
+
+            className="input-style"
+
+            placeholder="Write product details..."
+
           />
 
-        </div>
-
-        {/* Unit */}
-
-        <div>
-
-          <label className="font-medium">
-            Unit
-          </label>
-
-          <select
-            {...register("unit")}
-            className="w-full border rounded-lg p-3 mt-2"
-          >
-
-            <option>Kg</option>
-            <option>Gram</option>
-            <option>Litre</option>
-            <option>Packet</option>
-            <option>Piece</option>
-
-          </select>
 
         </div>
 
-        {/* Stock */}
 
-        <div>
 
-          <label className="font-medium">
-            Stock
-          </label>
+
+
+
+
+
+
+        {/* AVAILABLE */}
+
+
+
+
+        <div className="bg-white rounded-xl shadow-md p-6 flex items-center gap-3">
+
 
           <input
-            {...register("stock")}
-            type="number"
-            className="w-full border rounded-lg p-3 mt-2"
-          />
 
-        </div>
-
-        {/* Available */}
-
-        <div className="flex items-center gap-3">
-
-          <input
             type="checkbox"
+
             {...register("available")}
+
+            className="w-5 h-5"
+
           />
+
 
           <label>
-            Available
+
+            Product Available
+
           </label>
+
 
         </div>
 
+
+
+
+
+
+
         <button
-          className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg"
+
+          disabled={loading}
+
+          className="bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white px-8 py-3 rounded-xl shadow"
+
         >
-          Save Product
+
+          {
+            loading
+            ? "Saving..."
+            : "Save Product"
+          }
+
+
         </button>
+
+
+
 
       </form>
 
+
+
     </div>
+
   );
+
 }
+
 
 export default AddProduct;

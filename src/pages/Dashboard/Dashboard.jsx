@@ -6,34 +6,50 @@ import StatCard from "../../components/Dashboard/StatCard";
 
 import { getDashboardStats } from "../../services/productService";
 
+
 function Dashboard() {
+
   const [stats, setStats] = useState({
     totalProducts: 0,
+    availableProducts: 0,
+    lowStock: 0,
     outOfStock: 0,
-    totalStock: 0,
+    lowStockProducts: [],
   });
+
 
   useEffect(() => {
     loadStats();
   }, []);
+
 
   async function loadStats() {
     const data = await getDashboardStats();
     setStats(data);
   }
 
+
   return (
     <div>
-      {/* Header */}
+
 
       <PageHeader
         title="Dashboard"
-        subtitle="Welcome to Sudhir Kirana Store Admin Panel"
+        subtitle="Inventory overview and business insights"
       />
+
+
 
       {/* Statistics */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="
+        grid 
+        grid-cols-1 
+        md:grid-cols-2 
+        lg:grid-cols-4 
+        gap-6
+      ">
+
 
         <StatCard
           title="Total Products"
@@ -41,17 +57,20 @@ function Dashboard() {
           color="#16A34A"
         />
 
+
         <StatCard
-          title="Today's Orders"
-          value="0"
+          title="Available Products"
+          value={stats.availableProducts}
           color="#2563EB"
         />
 
+
         <StatCard
-          title="Total Stock"
-          value={stats.totalStock}
+          title="Low Stock"
+          value={stats.lowStock}
           color="#F97316"
         />
+
 
         <StatCard
           title="Out Of Stock"
@@ -59,93 +78,198 @@ function Dashboard() {
           color="#DC2626"
         />
 
+
       </div>
 
-      {/* Recent Orders */}
 
-      <div className="bg-white rounded-xl shadow-md mt-8 p-6">
 
-        <h2 className="text-xl font-semibold mb-4">
-          Recent Orders
+
+
+      {/* Low Stock Alert */}
+
+      <div className="
+        bg-white
+        rounded-xl
+        shadow-md
+        mt-8
+        p-6
+      ">
+
+
+        <h2 className="
+          text-xl
+          font-semibold
+          mb-5
+        ">
+          ⚠ Low Stock Alert
         </h2>
 
-        <p className="text-gray-500">
-          No orders available.
-        </p>
+
+
+        {
+          stats.lowStockProducts.length === 0 ? (
+
+            <p className="text-gray-500">
+              All products have sufficient stock.
+            </p>
+
+          ) : (
+
+
+            <div className="space-y-4">
+
+
+              {
+                stats.lowStockProducts.map((product) => (
+
+                  <div
+                    key={product.id}
+                    className="
+                      flex
+                      justify-between
+                      items-center
+                      border-b
+                      pb-3
+                    "
+                  >
+
+
+                    <div>
+
+                      <p className="font-semibold">
+                        {product.name}
+                      </p>
+
+
+                      <p className="text-sm text-gray-500">
+                        Minimum required: {product.minimumStock} {product.unit}
+                      </p>
+
+                    </div>
+
+
+
+                    <span className="
+                      bg-orange-100
+                      text-orange-700
+                      px-3
+                      py-1
+                      rounded-full
+                      text-sm
+                    ">
+
+                      {product.stock} {product.unit}
+
+                    </span>
+
+
+                  </div>
+
+
+                ))
+              }
+
+
+            </div>
+
+
+          )
+        }
+
 
       </div>
+
+
+
+
+
+
 
       {/* Quick Actions */}
 
-      <div className="bg-white rounded-xl shadow-md mt-6 p-6">
+      <div className="
+        bg-white
+        rounded-xl
+        shadow-md
+        mt-6
+        p-6
+      ">
 
-        <h2 className="text-xl font-semibold mb-4">
+
+        <h2 className="
+          text-xl
+          font-semibold
+          mb-4
+        ">
           Quick Actions
         </h2>
 
-        <div className="flex flex-wrap gap-4">
+
+
+        <div className="
+          flex
+          flex-wrap
+          gap-4
+        ">
+
 
           <Link
             to="/add-product"
-            className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg transition"
+            className="
+              bg-green-700
+              hover:bg-green-800
+              text-white
+              px-5
+              py-3
+              rounded-lg
+            "
           >
             + Add Product
           </Link>
 
+
+
           <Link
             to="/products"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
+            className="
+              bg-blue-600
+              hover:bg-blue-700
+              text-white
+              px-5
+              py-3
+              rounded-lg
+            "
           >
             View Products
           </Link>
 
+
+
           <Link
             to="/orders"
-            className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg transition"
+            className="
+              bg-purple-600
+              hover:bg-purple-700
+              text-white
+              px-5
+              py-3
+              rounded-lg
+            "
           >
             View Orders
           </Link>
 
-        </div>
-
-      </div>
-
-      {/* Inventory Summary */}
-
-      <div className="bg-white rounded-xl shadow-md mt-6 p-6">
-
-        <h2 className="text-xl font-semibold mb-4">
-          Inventory Summary
-        </h2>
-
-        <div className="space-y-3">
-
-          <div className="flex justify-between border-b pb-2">
-            <span>Total Products</span>
-            <span className="font-semibold">
-              {stats.totalProducts}
-            </span>
-          </div>
-
-          <div className="flex justify-between border-b pb-2">
-            <span>Total Stock</span>
-            <span className="font-semibold">
-              {stats.totalStock}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Out Of Stock</span>
-            <span className="font-semibold text-red-600">
-              {stats.outOfStock}
-            </span>
-          </div>
 
         </div>
 
+
       </div>
+
+
+
     </div>
   );
 }
+
 
 export default Dashboard;
