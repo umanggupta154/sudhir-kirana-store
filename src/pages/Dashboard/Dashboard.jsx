@@ -1,9 +1,10 @@
 import PageHeader from "../../components/Common/PageHeader";
 import StatCard from "../../components/Dashboard/StatCard";
+import Button from "../../components/Common/Button";
 
 function Dashboard() {
   return (
-    <>
+    <div>
       {/* Page Header */}
       <PageHeader
         title="Dashboard"
@@ -11,7 +12,7 @@ function Dashboard() {
       />
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Products"
           value="0"
@@ -37,7 +38,7 @@ function Dashboard() {
         />
       </div>
 
-      {/* 👇 YAHAN Recent Orders Add Karna Hai */}
+      {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-md mt-8 p-6">
         <h2 className="text-xl font-semibold mb-4">
           Recent Orders
@@ -48,23 +49,27 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* 👇 Iske Bilkul Neeche Quick Actions Add Karna Hai */}
+      {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-md mt-6 p-6">
         <h2 className="text-xl font-semibold mb-4">
           Quick Actions
         </h2>
 
-        <div className="flex gap-4">
-          <button className="bg-green-700 text-white px-5 py-2 rounded-lg">
-            + Add Product
-          </button>
+        <div className="flex flex-wrap gap-4">
+          <Button
+            text="+ Add Product"
+            to="/add-product"
+            color="green"
+          />
 
-          <button className="bg-blue-600 text-white px-5 py-2 rounded-lg">
-            View Orders
-          </button>
+          <Button
+            text="View Orders"
+            to="/orders"
+            color="blue"
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
